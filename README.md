@@ -1,45 +1,44 @@
-# 🤟 Sign Language Interpretation
+# 💰 Enterprise Expense Management System
 
-A real-time **Sign Language Interpretation System** that recognizes hand gestures through a webcam and converts them into meaningful text. The project uses **Computer Vision**, **Deep Learning**, and **Natural Language Processing (NLP)** to improve communication between sign language users and non-sign language users.
+A modern **Enterprise Expense Management System** built using **HTML, CSS, and JavaScript**. The application enables employees, managers, and administrators to manage expenses efficiently with features such as role-based authentication, expense approval workflows, budget tracking, multi-currency support, payment integration, and interactive analytics.
 
 ---
 
-## 📌 Features
+## ✨ Features
 
-- 🔤 Real-time alphabet recognition
-- 📝 Dynamic word recognition with hand movements
-- 📷 Webcam-based gesture detection
-- 🧠 AI-assisted sentence generation using Ollama
-- ⚡ Fast and accurate predictions
-- 🖥️ Easy-to-use interface
-- 🤖 Supports local LLM integration for NLP
+- 🔐 User Registration & Login
+- 👥 Role-Based Access (Employee, Manager, Admin)
+- 💸 Add and Manage Expenses
+- ✅ Expense Approval & Rejection Workflow
+- 📊 Interactive Dashboard with Charts
+- 💰 Monthly Budget Management
+- 🌍 Multi-Currency Support
+- 💳 Razorpay Payment Integration
+- 👨‍👩‍👧 Group Expense Splitting
+- 📈 Weekly, Monthly & Yearly Expense Reports
+- 🔑 Password Management
+- 📱 Responsive User Interface
+- 💾 Local Storage Data Persistence
 
 ---
 
 ## 🛠️ Technologies Used
 
-- Python
-- OpenCV
-- MediaPipe
-- TensorFlow / Keras
-- NumPy
-- Matplotlib
-- Ollama (Mistral / Qwen or other supported models)
+- HTML5
+- CSS3
+- JavaScript (ES6)
+- Chart.js
+- Razorpay Checkout API
+- Exchange Rate API
+- Local Storage
 
 ---
 
 ## 📂 Project Structure
 
 ```
-Sign-Language-Interpretation/
-│── dataset/
-│── models/
-│── unified_collector.py
-│── ultra_robust_trainer.py
-│── advanced_word_collector.py
-│── adbvance_word_trainer.py
-│── system.py
-│── requirements.txt
+Enterprise-Expense-App/
+│── index.html
 │── README.md
 ```
 
@@ -50,177 +49,130 @@ Sign-Language-Interpretation/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/Sign-Language-Interpretation.git
+git clone https://github.com/yourusername/Enterprise-Expense-App.git
 ```
 
-### 2. Navigate to the Project Folder
+### 2. Open the Project Folder
 
 ```bash
-cd Sign-Language-Interpretation
+cd Enterprise-Expense-App
 ```
 
-### 3. Install Required Packages
+### 3. Run the Application
 
-```bash
-pip install -r requirements.txt
+Simply open the HTML file in your browser.
+
+```
+index.html
+```
+
+or use VS Code Live Server.
+
+---
+
+# 👤 User Roles
+
+### Employee
+
+- Register and Login
+- Add Expenses
+- Split Expenses with Groups
+- View Personal Dashboard
+- Make Expense Payments
+
+### Manager
+
+- Approve Expenses
+- Reject Expenses
+- Monitor Submitted Expenses
+
+### Admin
+
+- Manage Users
+- Set Monthly Budget
+- Create and Manage Groups
+- Monitor All Expenses
+- View Analytics Dashboard
+
+---
+
+# 📊 Dashboard Features
+
+- Weekly Expense Summary
+- Monthly Expense Summary
+- Yearly Expense Summary
+- Budget Tracking
+- Expense Trend Analysis
+- Pie Chart Visualization
+- Line Chart Reports
+
+---
+
+# 💳 Payment Integration
+
+The project supports **Razorpay Payment Gateway**.
+
+Replace the following placeholders before deployment:
+
+```javascript
+YOUR_RAZORPAY_KEY_ID
 ```
 
 ---
 
-# 📚 How to Train and Run
+# 🌍 Currency Support
 
-Follow the steps below in the given order.
+Supports multiple currencies including:
 
-## Step 1: Collect Alphabet Dataset
+- INR (₹)
+- USD ($)
+- EUR (€)
+- GBP (£)
 
-Run the following script to collect sign language alphabet images.
-
-```bash
-python unified_collector.py
-```
-
----
-
-## Step 2: Train the Alphabet Model
-
-Train the collected alphabet dataset.
-
-```bash
-python ultra_robust_trainer.py
-```
+Exchange rates are fetched using an Exchange Rate API.
 
 ---
 
-## Step 3: Collect Word Dataset
+# 📸 Screenshots
 
-Collect dynamic word gestures (including hand movements).
+Add screenshots of:
 
-```bash
-python advanced_word_collector.py
-```
-
----
-
-## Step 4: Train the Word Recognition Model
-
-Train the collected word dataset.
-
-```bash
-python adbvance_word_trainer.py
-```
+- Login Page
+- Registration Page
+- Dashboard
+- Expense Management
+- Budget Tracking
+- Analytics Charts
+- Group Management
 
 ---
 
-## Step 5: Run the Complete System
+# 🎯 Future Improvements
 
-Launch the final Sign Language Interpretation system.
-
-```bash
-python system.py
-```
-
----
-
-# 🤖 AI Integration (Important)
-
-For Natural Language Processing (NLP) and AI-assisted sentence generation, install **Ollama** and download at least one supported Large Language Model.
-
-Recommended models:
-
-- Mistral
-- Qwen
-- Llama (optional)
-
-Example:
-
-```bash
-ollama pull mistral
-```
-
-or
-
-```bash
-ollama pull qwen
-```
-
-The application uses Ollama to improve sentence formation and contextual interpretation of recognized signs.
-
----
-
-# ⚠️ Important Notes
-
-- Follow the training steps in the exact order.
-- Alphabet recognition should be trained before word recognition.
-- Word recognition depends on movement-based gesture data.
-- **Number recognition is currently under development and is not recommended for training or testing.**
-- Ensure your webcam is connected before collecting datasets or running the system.
-
----
-
-## 📸 Output
-
-You can add screenshots of:
-
-- Home Screen
-- Alphabet Detection
-- Word Detection
-- AI Generated Sentence
-- Final Prediction Window
-
-Example output:
-
-```
-Detected Sign : HELLO
-
-Generated Sentence :
-Hello! How are you today?
-```
-
----
-
-## 📊 Model Performance
-
-Update these values after training your models.
-
-| Model | Accuracy |
-|--------|----------|
-| Alphabet Recognition | XX% |
-| Word Recognition | XX% |
-
----
-
-## 🎯 Future Improvements
-
-- Number recognition
-- Larger vocabulary support
-- Continuous sentence recognition
-- Speech synthesis (Text-to-Speech)
-- Mobile application
-- Cloud deployment
-- Multi-language translation
-- Improved gesture tracking
+- Backend Integration (Node.js / Django / Spring Boot)
+- Database Support (MySQL / PostgreSQL)
+- Email Notifications
+- PDF Report Generation
+- Export to Excel
+- Mobile Responsive Dashboard
+- Dark Mode
+- AI-Based Expense Prediction
 
 ---
 
 ## 👨‍💻 Author
 
-**Rajesh R S**
+**Rakshitha M C**
 
 Bachelor of Computer Applications (BCA)
 
-Skills:
+### Skills
+
 - Python
 - SQL
-- Machine Learning
-- Computer Vision
-- Deep Learning
-
-GitHub:
-https://github.com/rajeshrs01/Sign-Language-Interpretation
-
-
----
+- JavaScript
+- HTML & CSS
 
 ## 📄 License
 
-This project is developed for educational, research, and learning purposes.
+This project is developed for educational and learning purposes.
