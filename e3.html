@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Expense App</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #6a1b9a, #1e88e5);
+            color: #333;
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        #loginPage {
+            transform: translateX(100%);
+            opacity: 0;
+            scale: 0.9;
+            animation: slideIn 1s ease-out forwards;
+        }
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; scale: 0.9; }
+            100% { transform: translateX(0); opacity: 1; scale: 1; }
+        }
+        h1 {
+            color: #1e88e5;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #1e88e5;
+            font-size: 1.3em;
+            margin-top: 20px;
+        }
+        .hidden { display: none; }
+        form { margin-bottom: 15px; }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a148c;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #b0bec5;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.9em;
+            background: white;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input:focus, select:focus {
+            border-color: #1e88e5;
+            box-shadow: 0 0 6px rgba(30, 136, 229, 0.3);
+            outline: none;
+        }
+        .password-field:focus {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #1e88e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        button:active { background: #1565c0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+        }
+        th {
+            background: #1e88e5;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background-color: #f9fafb; }
+        tr:hover { background-color: #e3f2fd; }
+        .message {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: 500;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .error { color: #d32f2f; background: #ffebee; }
+        .success { color: #2e7d32; background: #e8f5e9; }
+        .action-btn {
+            padding: 5px 10px;
+            margin-right: 6px;
+            font-size: 0.8em;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .approve-btn { background: #43a047; }
+        .approve-btn:active { background: #388e3c; }
+        .reject-btn { background: #d32f2f; }
+        .reject-btn:active { background: #c62828; }
+        .remove-btn { background: #d32f2f; }
+        .remove-btn:active { background: #c62828; }
+        .manage-btn { background: #0288d1; }
+        .manage-btn:active { background: #0277bd; }
+        .link {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .link a {
+            color: #1e88e5;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .link a:active { color: #1565c0; text-decoration: underline; }
+        .form-container {
+            margin-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+        }
+        .user-management, .group-management {
+            margin-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+        }
+        .user-table, .group-table, .split-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .password-content {
+            max-width: 350px;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-summary {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .summary-card {
+            flex: 1;
+            min-width: 180px;
+            padding: 12px;
+            background: #f5f7fa;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .summary-card h3 {
+            color: #1e88e5;
+            margin: 0 0 8px;
+            font-size: 1em;
+        }
+        .summary-card p {
+            margin: 0;
+            font-weight: 500;
+            color: #4a148c;
+        }
+        .status-accepted {
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-rejected {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-pending {
+            color: #f57c00;
+            background: #fef9e7;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .chart-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        canvas { max-width: 100%; }
+        .filter-container {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .budget-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .budget-container.hidden { display: none; }
+        @media (max-width: 768px) {
+            .container { padding: 15px; max-width: 100%; }
+            input, select, button { font-size: 0.8em; padding: 8px; }
+            table { font-size: 0.7em; }
+            .action-btn { padding: 3px 6px; font-size: 0.7em; }
+            .summary-card { min-width: 150px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="loginPage">
+        <h1>Enterprise Expense App</h1>
+        <p class="link">Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
+        <form id="loginForm">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" required>
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" class="password-field" required>
+            <button type="submit">Login</button>
+        </form>
+        <div class="message" id="loginMessage"></div>
+    </div>
+
+    <div class="container hidden" id="registerPage">
+        <h1>Register</h1>
+        <form id="registerForm">
+            <label for="registerUsername">Username:</label>
+            <input type="text" id="registerUsername" required>
+            <label for="registerPassword">Password:</label>
+            <input type="password" id="registerPassword" class="password-field" required>
+            <label for="role">Role:</label>
+            <select id="role" required>
+                <option value="Employee">Employee</option>
+                <option value="Manager">Manager</option>
+                <option value="Admin">Admin</option>
+            </select>
+            <button type="submit">Register</button>
+        </form>
+        <div class="message" id="registerMessage"></div>
+        <p class="link"><a href="#" onclick="showLogin()">Back to Login</a></p>
+    </div>
+
+    <div class="container hidden" id="dashboardPage">
+        <h1>Welcome, <span id="currentUser"></span> (<span id="currentRole"></span>)</h1>
+        <p class="link"><a href="#" onclick="logout()">Logout</a></p>
+        <div class="filter-container">
+            <label for="displayCurrency">Display Currency:</label>
+            <select id="displayCurrency" onchange="updateDashboard()">
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+            </select>
+            <label for="startMonth">Start Month:</label>
+            <input type="month" id="startMonth" onchange="updateDashboard()">
+        </div>
+        <div class="dashboard-summary" id="expenseSummary"></div>
+        <div class="budget-container hidden" id="budgetContainer">
+            <h2>Set Monthly Budget</h2>
+            <form id="budgetForm">
+                <label for="budgetCurrency">Budget Currency:</label>
+                <select id="budgetCurrency">
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                </select>
+                <label for="monthlyBudget">Monthly Budget:</label>
+                <input type="number" id="monthlyBudget" step="0.01" required>
+                <button type="submit">Set Budget</button>
+            </form>
+        </div>
+        <h2>Expenses</h2>
+        <table id="expenseTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Split With</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="expenseBody"></tbody>
+        </table>
+        <div class="chart-container">
+            <h2>Monthly Budget Overview</h2>
+            <canvas id="pieChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h2>Expense Trend</h2>
+            <canvas id="lineChart"></canvas>
+        </div>
+        <div class="form-container">
+            <h3>Add Expense</h3>
+            <form id="expenseForm">
+                <label for="expenseCurrency">Currency:</label>
+                <select id="expenseCurrency">
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                </select>
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" step="0.01" required>
+                <label for="category">Category:</label>
+                <select id="category" onchange="toggleOtherCategory()" required>
+                    <option value="Travel">Travel</option>
+                    <option value="Food">Food</option>
+                    <option value="Office Supplies">Office Supplies</option>
+                    <option value="Other">Other</option>
+                </select>
+                <div id="otherCategoryContainer" class="hidden">
+                    <label for="otherCategory">Specify Other Category:</label>
+                    <input type="text" id="otherCategory" placeholder="Enter custom category">
+                </div>
+                <label for="description">Description:</label>
+                <input type="text" id="description">
+                <label for="splitWithGroup">Split With Group (Optional):</label>
+                <select id="splitWithGroup">
+                    <option value="">None</option>
+                </select>
+                <button type="submit">Add Expense</button>
+            </form>
+        </div>
+        <div class="message" id="dashboardMessage"></div>
+        <div class="user-management hidden" id="userManagement">
+            <h2>User Management</h2>
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Password</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userBody"></tbody>
+            </table>
+        </div>
+        <div class="group-management">
+            <h2>Group Management</h2>
+            <form id="groupForm">
+                <label for="groupName">Group Name:</label>
+                <input type="text" id="groupName" required>
+                <label for="groupMembers">Members (comma-separated usernames):</label>
+                <input type="text" id="groupMembers" placeholder="e.g., rajesh, manager" required>
+                <button type="submit">Create Group</button>
+            </form>
+            <table class="group-table">
+                <thead>
+                    <tr>
+                        <th>Group Name</th>
+                        <th>Members</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="groupBody"></tbody>
+            </table>
+            <h2>Split Balances</h2>
+            <table class="split-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Owes</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="splitBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="password-modal" id="passwordModal">
+        <div class="password-content">
+            <h1>Manage Password</h1>
+            <form id="passwordForm" class="password-form">
+                <label for="currentPassword">Current Password:</label>
+                <input type="text" id="currentPassword" class="password-field" readonly>
+                <label for="newPassword">New Password:</label>
+                <input type="text" id="newPassword" class="password-field">
+                <button type="submit">Update Password</button>
+                <button type="button" onclick="resetPassword()">Reset to Default</button>
+            </form>
+            <div class="message" id="passwordMessage"></div>
+            <p class="link"><a href="#" onclick="hidePassword()">Back</a></p>
+        </div>
+    </div>
+
+    <script>
+        let users = JSON.parse(localStorage.getItem('users')) || [
+            { username: "rajesh", password: "mypassword", role: "Employee", email: "rajesh@example.com" },
+            { username: "manager", password: "manager123", role: "Manager", email: "manager@example.com" },
+            { username: "admin", password: "admin123", role: "Admin", email: "admin@example.com" }
+        ];
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        let groups = JSON.parse(localStorage.getItem('groups')) || [];
+        let monthlyBudget = { 
+            amount: parseFloat(localStorage.getItem('monthlyBudgetAmount')) || 500000, 
+            currency: localStorage.getItem('monthlyBudgetCurrency') || 'INR' 
+        };
+        let currentUser = null;
+        let pieChart, lineChart;
+        let exchangeRates = {};
+        const baseCurrency = 'INR';
+        const apiKey = 'YOUR_EXCHANGERATE_API_KEY'; // Replace with exchangerate-api.com key
+        const razorpayKey = 'YOUR_RAZORPAY_KEY_ID'; // Replace with your Razorpay Key ID
+
+        async function fetchExchangeRates() {
+            try {
+                const response = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/${baseCurrency}`);
+                const data = await response.json();
+                if (data.result === "success") {
+                    exchangeRates = data.conversion_rates;
+                } else {
+                    console.error("Failed to fetch exchange rates:", data);
+                    displayMessage("dashboardMessage", "Currency rates unavailable, using INR as default", "error");
+                }
+            } catch (error) {
+                console.error("Error fetching exchange rates:", error);
+                exchangeRates = { INR: 1, USD: 0.012, EUR: 0.011, GBP: 0.009 }; // Fallback rates
+            }
+        }
+
+        function convertAmount(amount, fromCurrency, toCurrency) {
+            if (!exchangeRates[fromCurrency] || !exchangeRates[toCurrency]) return amount;
+            return (amount / exchangeRates[fromCurrency]) * exchangeRates[toCurrency];
+        }
+
+        function formatCurrency(amount, currency) {
+            const symbols = { INR: '₹', USD: '$', EUR: '€', GBP: '£' };
+            return `${symbols[currency]}${amount.toFixed(2)}`;
+        }
+
+        function showLogin() {
+            document.getElementById("loginPage").classList.remove("hidden");
+            document.getElementById("registerPage").classList.add("hidden");
+            document.getElementById("dashboardPage").classList.add("hidden");
+            document.getElementById("passwordModal").classList.add("hidden");
+            document.getElementById("loginPage").style.animation = "slideIn 1s ease-out forwards";
+        }
+
+        function showRegister() {
+            document.getElementById("loginPage").classList.add("hidden");
+            document.getElementById("registerPage").classList.remove("hidden");
+            document.getElementById("dashboardPage").classList.add("hidden");
+            document.getElementById("passwordModal").classList.add("hidden");
+        }
+
+        function showDashboard() {
+            document.getElementById("loginPage").classList.add("hidden");
+            document.getElementById("registerPage").classList.add("hidden");
+            document.getElementById("dashboardPage").classList.remove("hidden");
+            document.getElementById("passwordModal").classList.add("hidden");
+            document.getElementById("currentUser").textContent = currentUser.username;
+            document.getElementById("currentRole").textContent = currentUser.role;
+            document.getElementById("budgetContainer").classList.toggle("hidden", currentUser.role !== "Admin");
+            document.getElementById("userManagement").classList.toggle("hidden", currentUser.role !== "Admin");
+            if (currentUser.role === "Admin") updateUserTable();
+            populateGroupDropdown();
+            updateGroupTable();
+            updateSplitBalances();
+            fetchExchangeRates().then(updateDashboard);
+        }
+
+        function showPassword(username) {
+            document.getElementById("passwordModal").classList.remove("hidden");
+            const user = users.find(u => u.username === username);
+            document.getElementById("currentPassword").value = user.password;
+            document.getElementById("newPassword").value = "";
+            document.getElementById("currentPassword").dataset.username = username;
+        }
+
+        function hidePassword() {
+            document.getElementById("passwordModal").classList.add("hidden");
+            showDashboard();
+        }
+
+        function logout() {
+            currentUser = null;
+            if (pieChart) pieChart.destroy();
+            if (lineChart) lineChart.destroy();
+            showLogin();
+            displayMessage("loginMessage", "Logged out successfully!", "success");
+        }
+
+        function displayMessage(elementId, message, type) {
+            const msgDiv = document.getElementById(elementId);
+            if (msgDiv) {
+                msgDiv.textContent = message;
+                msgDiv.className = `message ${type}`;
+                setTimeout(() => {
+                    msgDiv.textContent = "";
+                    msgDiv.className = "message";
+                }, 3000);
+            }
+        }
+
+        function toggleOtherCategory() {
+            const category = document.getElementById("category").value;
+            const otherContainer = document.getElementById("otherCategoryContainer");
+            otherContainer.classList.toggle("hidden", category !== "Other");
+            if (category !== "Other") document.getElementById("otherCategory").value = "";
+        }
+
+        function getFilteredExpenses() {
+            const role = currentUser.role;
+            const userId = currentUser.username;
+            let filtered = role === "Admin" ? expenses :
+                          role === "Manager" ? expenses.filter(e => e.status !== "Rejected") :
+                          expenses.filter(e => e.userId === userId);
+            const startMonth = document.getElementById("startMonth").value;
+            if (startMonth) {
+                const [year, month] = startMonth.split('-');
+                const startDate = new Date(year, month - 1, 1);
+                filtered = filtered.filter(e => new Date(e.date) >= startDate);
+            }
+            return filtered;
+        }
+
+        function updateExpenseTable() {
+            const tbody = document.getElementById("expenseBody");
+            tbody.innerHTML = "";
+            const filteredExpenses = getFilteredExpenses();
+            const displayCurrency = document.getElementById("displayCurrency").value;
+            filteredExpenses.forEach(expense => {
+                const tr = document.createElement("tr");
+                const convertedAmount = convertAmount(expense.amount, baseCurrency, displayCurrency);
+                let statusClass, statusText;
+                switch (expense.status) {
+                    case "Approved": statusClass = "status-accepted"; statusText = "Accepted"; break;
+                    case "Rejected": statusClass = "status-rejected"; statusText = "Rejected"; break;
+                    case "Paid": statusClass = "status-accepted"; statusText = `Paid (${expense.paymentId || ''})`; break;
+                    default: statusClass = "status-pending"; statusText = "Pending";
+                }
+                tr.innerHTML = `
+                    <td>${expense.id}</td>
+                    <td>${formatCurrency(convertedAmount, displayCurrency)}</td>
+                    <td>${expense.category}</td>
+                    <td>${expense.description}</td>
+                    <td><span class="${statusClass}">${statusText}</span></td>
+                    <td>${expense.date}</td>
+                    <td>${expense.splitWith ? expense.splitWith.join(", ") : "None"}</td>
+                    <td>${(currentUser.role === "Manager" || currentUser.role === "Admin") && expense.status === "Pending" ?
+                        `<button class="action-btn approve-btn" onclick="approveExpense(${expense.id})">Approve</button>
+                         <button class="action-btn reject-btn" onclick="rejectExpense(${expense.id})">Reject</button>` : ""}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateUserTable() {
+            const tbody = document.getElementById("userBody");
+            tbody.innerHTML = "";
+            users.forEach(user => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.role}</td>
+                    <td>${user.password}</td>
+                    <td>
+                        <button class="action-btn remove-btn" onclick="removeUser('${user.username}')">Remove</button>
+                        <button class="action-btn manage-btn" onclick="showPassword('${user.username}')">Manage Password</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateExpenseSummary() {
+            const summaryDiv = document.getElementById("expenseSummary");
+            const filteredExpenses = getFilteredExpenses();
+            const displayCurrency = document.getElementById("displayCurrency").value;
+            const now = new Date();
+            const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const yearStart = new Date(now.getFullYear(), 0, 1);
+
+            const totalThisWeek = convertAmount(
+                filteredExpenses.filter(e => new Date(e.date) >= weekStart && (e.status === "Approved" || e.status === "Paid")).reduce((sum, e) => sum + e.amount, 0),
+                baseCurrency, displayCurrency
+            );
+            const totalThisMonth = convertAmount(
+                filteredExpenses.filter(e => new Date(e.date) >= monthStart && (e.status === "Approved" || e.status === "Paid")).reduce((sum, e) => sum + e.amount, 0),
+                baseCurrency, displayCurrency
+            );
+            const totalThisYear = convertAmount(
+                filteredExpenses.filter(e => new Date(e.date) >= yearStart && (e.status === "Approved" || e.status === "Paid")).reduce((sum, e) => sum + e.amount, 0),
+                baseCurrency, displayCurrency
+            );
+            const convertedBudget = convertAmount(monthlyBudget.amount, monthlyBudget.currency, displayCurrency);
+            const budgetDifference = convertedBudget - totalThisMonth;
+
+            summaryDiv.innerHTML = `
+                <div class="summary-card">
+                    <h3>This Week</h3>
+                    <p>${formatCurrency(totalThisWeek, displayCurrency)}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>This Month</h3>
+                    <p>${formatCurrency(totalThisMonth, displayCurrency)} / ${formatCurrency(convertedBudget, displayCurrency)}</p>
+                    <p style="color: ${budgetDifference >= 0 ? '#2e7d32' : '#d32f2f'}">
+                        ${budgetDifference >= 0 ? 'Remaining' : 'Over'}: ${formatCurrency(Math.abs(budgetDifference), displayCurrency)}
+                    </p>
+                </div>
+                <div class="summary-card">
+                    <h3>This Year</h3>
+                    <p>${formatCurrency(totalThisYear, displayCurrency)}</p>
+                </div>
+            `;
+        }
+
+        function updateCharts() {
+            const filteredExpenses = getFilteredExpenses();
+            const displayCurrency = document.getElementById("displayCurrency").value;
+            const now = new Date();
+            const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+            const approvedAmount = convertAmount(
+                filteredExpenses.filter(e => new Date(e.date) >= currentMonthStart && new Date(e.date) <= currentMonthEnd && (e.status === "Approved" || e.status === "Paid"))
+                    .reduce((sum, e) => sum + e.amount, 0),
+                baseCurrency, displayCurrency
+            );
+            const convertedBudget = convertAmount(monthlyBudget.amount, monthlyBudget.currency, displayCurrency);
+            const remainingBudget = Math.max(convertedBudget - approvedAmount, 0);
+
+            if (pieChart) pieChart.destroy();
+            pieChart = new Chart(document.getElementById('pieChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Approved/Paid Expenses', 'Remaining Budget'],
+                    datasets: [{
+                        data: [approvedAmount, remainingBudget],
+                        backgroundColor: ['#FF6384', '#36A2EB']
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: `Monthly Budget: ${formatCurrency(convertedBudget, displayCurrency)} - Current Month` }
+                    }
+                }
+            });
+
+            const monthlyTotals = {};
+            filteredExpenses.forEach(exp => {
+                const date = new Date(exp.date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                if (exp.status === "Approved" || exp.status === "Paid") {
+                    monthlyTotals[monthKey] = (monthlyTotals[monthKey] || 0) + exp.amount;
+                }
+            });
+            const sortedMonths = Object.keys(monthlyTotals).sort();
+            if (lineChart) lineChart.destroy();
+            lineChart = new Chart(document.getElementById('lineChart'), {
+                type: 'line',
+                data: {
+                    labels: sortedMonths,
+                    datasets: [{
+                        label: `Total Approved/Paid Expenses (${displayCurrency})`,
+                        data: sortedMonths.map(m => convertAmount(monthlyTotals[m] || 0, baseCurrency, displayCurrency)),
+                        borderColor: '#36A2EB',
+                        fill: false,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: { title: { display: true, text: 'Month' } },
+                        y: { title: { display: true, text: `Amount (${displayCurrency})` } }
+                    }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            updateExpenseTable();
+            updateExpenseSummary();
+            updateCharts();
+            updateSplitBalances();
+        }
+
+        function removeUser(username) {
+            if (confirm(`Are you sure you want to remove ${username}?`)) {
+                users = users.filter(u => u.username !== username);
+                groups = groups.map(g => ({
+                    ...g,
+                    members: g.members.filter(m => m !== username)
+                })).filter(g => g.members.length > 0);
+                saveUsers();
+                saveGroups();
+                if (currentUser && currentUser.username === username) {
+                    logout();
+                } else {
+                    updateUserTable();
+                    updateGroupTable();
+                    displayMessage("dashboardMessage", `${username} removed successfully!`, "success");
+                }
+            }
+        }
+
+        function approveExpense(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (expense) {
+                const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+                const totalThisMonth = convertAmount(
+                    expenses.filter(e => new Date(e.date) >= monthStart && (e.status === "Approved" || e.status === "Paid")).reduce((sum, e) => sum + e.amount, 0),
+                    baseCurrency, monthlyBudget.currency
+                );
+                const expenseInBudgetCurrency = convertAmount(expense.amount, baseCurrency, monthlyBudget.currency);
+                if (totalThisMonth + expenseInBudgetCurrency > monthlyBudget.amount) {
+                    displayMessage("dashboardMessage", "Approval exceeds monthly budget!", "error");
+                    return;
+                }
+                expense.status = "Approved";
+                saveExpenses();
+                updateDashboard();
+                displayMessage("dashboardMessage", "Expense approved!", "success");
+            }
+        }
+
+        function rejectExpense(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (expense) {
+                expense.status = "Rejected";
+                saveExpenses();
+                updateDashboard();
+                displayMessage("dashboardMessage", "Expense rejected!", "success");
+            }
+        }
+
+        function saveUsers() {
+            localStorage.setItem("users", JSON.stringify(users));
+        }
+
+        function saveExpenses() {
+            localStorage.setItem("expenses", JSON.stringify(expenses));
+        }
+
+        function saveBudget() {
+            localStorage.setItem("monthlyBudgetAmount", monthlyBudget.amount);
+            localStorage.setItem("monthlyBudgetCurrency", monthlyBudget.currency);
+        }
+
+        function saveGroups() {
+            localStorage.setItem("groups", JSON.stringify(groups));
+        }
+
+        function initiatePayment(amount, currency, expenseData, callback) {
+            if (typeof Razorpay === 'undefined') {
+                displayMessage("dashboardMessage", "Payment gateway unavailable", "error");
+                expenses.push(expenseData); // Add as pending if payment gateway fails
+                saveExpenses();
+                callback();
+                return;
+            }
+            const amountInPaise = Math.round(convertAmount(amount, currency, 'INR') * 100);
+            const options = {
+                key: razorpayKey,
+                amount: amountInPaise,
+                currency: 'INR',
+                name: 'Enterprise Expense App',
+                description: `Payment for ${expenseData.description || 'Expense'}`,
+                handler: function(response) {
+                    expenseData.paymentId = response.razorpay_payment_id;
+                    expenseData.status = "Paid";
+                    expenses.push(expenseData);
+                    saveExpenses();
+                    callback();
+                },
+                prefill: {
+                    name: currentUser.username,
+                    email: currentUser.email
+                },
+                theme: { color: '#1e88e5' }
+            };
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function(response) {
+                displayMessage("dashboardMessage", `Payment failed: ${response.error.description}`, "error");
+                expenseData.status = "Pending";
+                expenses.push(expenseData);
+                saveExpenses();
+                callback();
+            });
+            rzp.open();
+        }
+
+        function populateGroupDropdown() {
+            const select = document.getElementById("splitWithGroup");
+            select.innerHTML = '<option value="">None</option>';
+            groups.forEach(group => {
+                if (group.members.includes(currentUser.username)) {
+                    const option = document.createElement("option");
+                    option.value = group.name;
+                    option.textContent = group.name;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function updateGroupTable() {
+            const tbody = document.getElementById("groupBody");
+            tbody.innerHTML = "";
+            groups.forEach(group => {
+                if (group.members.includes(currentUser.username) || currentUser.role === "Admin") {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${group.name}</td>
+                        <td>${group.members.join(", ")}</td>
+                        <td><button class="action-btn remove-btn" onclick="removeGroup('${group.name}')">Remove</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+        }
+
+        function removeGroup(groupName) {
+            if (confirm(`Are you sure you want to remove the group ${groupName}?`)) {
+                groups = groups.filter(g => g.name !== groupName);
+                expenses = expenses.map(e => {
+                    if (e.splitWith && e.splitWith.includes(groupName)) {
+                        e.splitWith = e.splitWith.filter(g => g !== groupName);
+                    }
+                    return e;
+                });
+                saveGroups();
+                saveExpenses();
+                updateGroupTable();
+                populateGroupDropdown();
+                updateDashboard();
+                displayMessage("dashboardMessage", `${groupName} removed successfully!`, "success");
+            }
+        }
+
+        function updateSplitBalances() {
+            const tbody = document.getElementById("splitBody");
+            tbody.innerHTML = "";
+            const balances = {};
+            expenses.forEach(expense => {
+                if (expense.splitWith && expense.splitWith.length > 0 && (expense.status === "Paid" || expense.status === "Approved")) {
+                    const group = groups.find(g => g.name === expense.splitWith[0]);
+                    if (group && group.members.includes(currentUser.username)) {
+                        const splitAmount = expense.amount / group.members.length;
+                        group.members.forEach(member => {
+                            if (member !== expense.userId) {
+                                balances[member] = (balances[member] || 0) + splitAmount;
+                                balances[expense.userId] = (balances[expense.userId] || 0) - splitAmount;
+                            }
+                        });
+                    }
+                }
+            });
+            const displayCurrency = document.getElementById("displayCurrency").value;
+            Object.keys(balances).forEach(user => {
+                if (balances[user] !== 0 && (user === currentUser.username || currentUser.role === "Admin")) {
+                    const tr = document.createElement("tr");
+                    const amount = convertAmount(Math.abs(balances[user]), baseCurrency, displayCurrency);
+                    tr.innerHTML = `
+                        <td>${user}</td>
+                        <td>${balances[user] > 0 ? "Owes you" : "You owe"}</td>
+                        <td>${formatCurrency(amount, displayCurrency)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("loginForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                const username = document.getElementById("loginUsername").value;
+                const password = document.getElementById("loginPassword").value;
+                const user = users.find(u => u.username === username && u.password === password);
+                if (user) {
+                    currentUser = { ...user };
+                    showDashboard();
+                    this.reset();
+                    displayMessage("dashboardMessage", "Logged in successfully!", "success");
+                } else {
+                    displayMessage("loginMessage", "Invalid username or password", "error");
+                }
+            });
+
+            document.getElementById("registerForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                const username = document.getElementById("registerUsername").value;
+                const password = document.getElementById("registerPassword").value;
+                const role = document.getElementById("role").value;
+
+                if (username.length < 3) {
+                    displayMessage("registerMessage", "Username must be at least 3 characters", "error");
+                    return;
+                }
+                if (password.length < 6) {
+                    displayMessage("registerMessage", "Password must be at least 6 characters", "error");
+                    return;
+                }
+                if (users.find(u => u.username === username)) {
+                    displayMessage("registerMessage", "Username already taken", "error");
+                    return;
+                }
+                users.push({ username, password, role, email: `${username}@example.com` });
+                saveUsers();
+                this.reset();
+                showLogin();
+                displayMessage("loginMessage", "Registered successfully! Please log in.", "success");
+            });
+
+            document.getElementById("expenseForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                const amount = parseFloat(document.getElementById("amount").value);
+                const expenseCurrency = document.getElementById("expenseCurrency").value;
+                let category = document.getElementById("category").value;
+                const otherCategory = document.getElementById("otherCategory").value.trim();
+                const description = document.getElementById("description").value;
+                const splitWithGroup = document.getElementById("splitWithGroup").value;
+                const userId = currentUser.username;
+                const id = expenses.length > 0 ? Math.max(...expenses.map(e => e.id)) + 1 : 1;
+                const date = new Date().toISOString().split('T')[0];
+
+                if (category === "Other" && otherCategory) {
+                    category = `Other - ${otherCategory}`;
+                } else if (category === "Other" && !otherCategory) {
+                    displayMessage("dashboardMessage", "Please specify a category for 'Other'", "error");
+                    return;
+                }
+
+                const amountInBase = convertAmount(amount, expenseCurrency, baseCurrency);
+                const expenseData = { 
+                    id, 
+                    userId, 
+                    amount: amountInBase, 
+                    category, 
+                    description, 
+                    status: "Pending", 
+                    date, 
+                    splitWith: splitWithGroup ? [splitWithGroup] : [] 
+                };
+
+                initiatePayment(amount, expenseCurrency, expenseData, () => {
+                    updateDashboard();
+                    displayMessage("dashboardMessage", "Expense added successfully!", "success");
+                    this.reset();
+                    toggleOtherCategory();
+                });
+            });
+
+            document.getElementById("budgetForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                const newBudget = parseFloat(document.getElementById("monthlyBudget").value);
+                const budgetCurrency = document.getElementById("budgetCurrency").value;
+                if (newBudget >= 0) {
+                    monthlyBudget = { amount: convertAmount(newBudget, budgetCurrency, baseCurrency), currency: baseCurrency };
+                    saveBudget();
+                    updateDashboard();
+                    displayMessage("dashboardMessage", "Monthly budget updated!", "success");
+                    this.reset();
+                } else {
+                    displayMessage("dashboardMessage", "Budget must be a positive number", "error");
+                }
+            });
+
+            document.getElementById("groupForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                const groupName = document.getElementById("groupName").value;
+                const members = document.getElementById("groupMembers").value.split(',').map(m => m.trim()).filter(m => m);
+
+                if (groups.find(g => g.name === groupName)) {
+                    displayMessage("dashboardMessage", "Group name already exists", "error");
+                    return;
+                }
+                if (!members.includes(currentUser.username)) {
+                    members.push(currentUser.username);
+                }
+                const invalidMembers = members.filter(m => !users.find(u => u.username === m));
+                if (invalidMembers.length > 0) {
+                    displayMessage("dashboardMessage", `Invalid users: ${invalidMembers.join(", ")}`, "error");
+                    return;
+                }
+                groups.push({ name: groupName, members });
+                saveGroups();
+                updateGroupTable();
+                populateGroupDropdown();
+                this.reset();
+                displayMessage("dashboardMessage", "Group created successfully!", "success");
+            });
+
+            document.getElementById("passwordForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                const username = document.getElementById("currentPassword").dataset.username;
+                const newPassword = document.getElementById("newPassword").value;
+                if (newPassword) {
+                    const user = users.find(u => u.username === username);
+                    if (user) {
+                        user.password = newPassword;
+                        saveUsers();
+                        displayMessage("passwordMessage", `Password updated for ${username}!`, "success");
+                        hidePassword();
+                    }
+                } else {
+                    displayMessage("passwordMessage", "New password cannot be empty", "error");
+                }
+            });
+
+            function resetPassword() {
+                const username = document.getElementById("currentPassword").dataset.username;
+                const user = users.find(u => u.username === username);
+                if (user) {
+                    const defaultPassword = "default123";
+                    user.password = defaultPassword;
+                    saveUsers();
+                    displayMessage("passwordMessage", `Password reset for ${username} to ${defaultPassword}!`, "success");
+                    hidePassword();
+                }
+            }
+
+            showLogin();
+        });
+    </script>
+</body>
+</html>
